@@ -1,26 +1,57 @@
+#[derive(Debug, Clone)]
+struct Todo {
+    message: String,
+}
+
+use std::io::{Stdin, Stdout, Write};
+
+struct Terminal {
+    stdin: Stdin,
+    stdout: Stdout,
+}
+
 fn main() {
     loop {
+        let mut pergunta = Terminal::new();
+        let todo = pergunta.ask_for_new_todo();
+
+        pergunta.show_todo(&todo);
+    }
+}
+
+impl Terminal {
+    fn new() -> Self {
+        Terminal {
+            stdin: std::io::stdin(),
+            stdout: std::io::stdout(),
+        }
+    }
+
+    fn ask_for_new_todo(&mut self) -> Todo {
         println!("\nQuer adicionar um novo TODO 📝?");
 
         println!("digite (sim) para confirmar 👍  ou (nao) para negar 👎");
 
-        let resposta = input();
+        let mut resposta = String::new();
 
-        if resposta == "sim" {
+        self.stdin.read_line(&mut resposta).expect("sim");
+
+        if resposta.trim() == "sim" {
             println!("\nQual TODO 📝 deseja criar?");
 
-            let todo = input();
+            let mut novo_todo = String::new();
 
-            println!("\nvocê criou o TODO\n\n 🔹 {}", todo);
+            self.stdin.read_line(&mut novo_todo).unwrap().to_string();
+
+            Todo { message: novo_todo }
         } else {
             println!("\nAté a próxima 👋 e volte sempre!🫶");
-            break;
+
+            std::process::exit(0);
         }
     }
-}
 
-fn input() -> String {
-    let mut buf = String::new();
-    std::io::stdin().read_line(&mut buf).unwrap();
-    buf.trim().to_string()
+    fn show_todo(&mut self, todo: &Todo) {
+        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔹 {}", todo.message).unwrap();
+    }
 }
