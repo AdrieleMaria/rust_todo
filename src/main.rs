@@ -11,8 +11,9 @@ struct Terminal {
 }
 
 fn main() {
-    loop {
-        let mut pergunta = Terminal::new();
+    let mut pergunta = Terminal::new();
+
+    loop {       
         let todo = pergunta.ask_for_new_todo();
 
         pergunta.show_todo(&todo);
@@ -41,7 +42,7 @@ impl Terminal {
 
             let mut novo_todo = String::new();
 
-            self.stdin.read_line(&mut novo_todo).unwrap().to_string();
+            self.stdin.read_line(&mut novo_todo).unwrap();
 
             Todo { message: novo_todo }
         } else {
