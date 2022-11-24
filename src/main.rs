@@ -34,10 +34,8 @@ impl Terminal {
     }
 
     fn ask_for_new_todo(&mut self) -> Todo {
-        println!("\nQuer adicionar um novo TODO 📝?");
-
-        println!("digite (sim) para confirmar 👍  ou (nao) para negar 👎");
-
+        writeln!(self.stdout, "\nQuer adicionar um novo TODO 📝?\ndigite (sim) para confirmar 👍  ou (nao) para negar 👎").unwrap();
+        
         let mut resposta = input();
 
         self.stdin.read_line(&mut resposta).unwrap();
@@ -58,6 +56,6 @@ impl Terminal {
     }
 
     fn show_todo(&mut self, todo: &Todo) {
-        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔹 {}", todo.message).unwrap();
+        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔷 {}", todo.message).unwrap();
     }
 }
