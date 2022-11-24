@@ -10,6 +10,11 @@ struct Terminal {
     stdout: Stdout,
 }
 
+fn input()-> String {
+    let string = String::new();    
+    string.to_string()
+}
+
 fn main() {
     let mut pergunta = Terminal::new();
 
@@ -33,21 +38,21 @@ impl Terminal {
 
         println!("digite (sim) para confirmar 👍  ou (nao) para negar 👎");
 
-        let mut resposta = String::new();
+        let mut resposta = input();
 
-        self.stdin.read_line(&mut resposta).expect("sim");
+        self.stdin.read_line(&mut resposta).unwrap();
 
         if resposta.trim() == "sim" {
-            println!("\nQual TODO 📝 deseja criar?");
-
-            let mut novo_todo = String::new();
+            writeln!(self.stdout, "\nQual TODO 📝 deseja criar?").unwrap();
+            
+            let mut novo_todo = input();
 
             self.stdin.read_line(&mut novo_todo).unwrap();
 
             Todo { message: novo_todo }
         } else {
-            println!("\nAté a próxima 👋 e volte sempre!🫶");
-
+            writeln!(self.stdout, "\nAté a próxima 👋 e volte sempre!🫶\n").unwrap();
+            
             std::process::exit(0);
         }
     }
