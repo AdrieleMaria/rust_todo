@@ -3,25 +3,29 @@ struct Todo {
     message: String,
 }
 
-use std::io::{Stdin, Stdout, Write};
+use std::io::{Error, Stdin, Stdout, Write};
 
 struct Terminal {
     stdin: Stdin,
     stdout: Stdout,
 }
 
-fn input()-> String {
-    let string = String::new();    
+fn input() -> String {
+    let string = String::new();
     string.to_string()
 }
 
 fn main() {
     let mut pergunta = Terminal::new();
 
-    loop {       
+    loop {
         let todo = pergunta.ask_for_new_todo();
 
-        pergunta.show_todo(&todo);
+        match todo {
+            Ok(todo) => pergunta.show_todo(&todo),
+
+            Err(Error) => pergunta.erro_todo(&Error),
+        }
     }
 }
 
@@ -33,29 +37,33 @@ impl Terminal {
         }
     }
 
-    fn ask_for_new_todo(&mut self) -> Todo {
+    fn ask_for_new_todo(&mut self) -> Result<Todo, Error> {
         writeln!(self.stdout, "\nQuer adicionar um novo TODO 📝?\ndigite (sim) para confirmar 👍  ou (nao) para negar 👎").unwrap();
-        
+
         let mut resposta = input();
 
-        self.stdin.read_line(&mut resposta).unwrap();
+        self.stdin.read_line(&mut resposta)?;
 
         if resposta.trim() == "sim" {
-            writeln!(self.stdout, "\nQual TODO 📝 deseja criar?").unwrap();
-            
+            writeln!(self.stdout, "\nQual TODO 📝 deseja criar?")?;
+
             let mut novo_todo = input();
 
-            self.stdin.read_line(&mut novo_todo).unwrap();
+            self.stdin.read_line(&mut novo_todo)?;
 
-            Todo { message: novo_todo }
+            Ok(Todo { message: novo_todo })
         } else {
-            writeln!(self.stdout, "\nAté a próxima 👋 e volte sempre!🫶\n").unwrap();
-            
+            writeln!(self.stdout, "\nAté a próxima 👋 e volte sempre!🫶\n")?;
+
             std::process::exit(0);
         }
     }
 
     fn show_todo(&mut self, todo: &Todo) {
-        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔷 {}", todo.message).unwrap();
+        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔷 {}", todo.message);
+    }
+
+    fn erro_todo(&mut self, erro: &Error) {
+        format!("\nDeu Erro!\n\n ");
     }
 }
