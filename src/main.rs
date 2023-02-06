@@ -10,21 +10,21 @@ struct Terminal {
     stdout: Stdout,
 }
 
-fn input() -> String {
-    let string = String::new();
-    string.to_string()
+fn main() {
+    if let Err(erro) = start() {
+        Terminal::erro_todo(erro);
+    }
 }
 
-fn main() {
+fn start() -> Result<(), TerminalError> {
     let mut pergunta = Terminal::new();
 
     loop {
-        let todo = pergunta.ask_for_new_todo();
+        let todo = pergunta.ask_for_new_todo()?;
 
         match todo {
-            Ok(todo) => pergunta.show_todo(&todo),
-
-            Err(Error) => pergunta.erro_todo(&Error),
+            Some(todo_msg) => pergunta.show_todo(&todo_msg)?,
+            None => return Ok(()),
         }
     }
 }
@@ -37,33 +37,46 @@ impl Terminal {
         }
     }
 
-    fn ask_for_new_todo(&mut self) -> Result<Todo, Error> {
-        writeln!(self.stdout, "\nQuer adicionar um novo TODO 📝?\ndigite (sim) para confirmar 👍  ou (nao) para negar 👎").unwrap();
+    fn ask_for_new_todo(&mut self) -> Result<Option<Todo>, TerminalError> {
+        writeln!(self.stdout, "\nQuer adicionar um novo TODO 📝?\ndigite (sim) para confirmar 👍  ou (nao) para negar 👎").map_err(TerminalError::Stdout)?;
 
-        let mut resposta = input();
+        let mut resposta = String::new();
 
-        self.stdin.read_line(&mut resposta)?;
+        self.stdin
+            .read_line(&mut resposta)
+            .map_err(TerminalError::Stdin)?;
 
         if resposta.trim() == "sim" {
-            writeln!(self.stdout, "\nQual TODO 📝 deseja criar?")?;
+            writeln!(self.stdout, "\nQual TODO 📝 deseja criar?").map_err(TerminalError::Stdout)?;
 
-            let mut novo_todo = input();
+            let mut novo_todo = String::new();
 
-            self.stdin.read_line(&mut novo_todo)?;
+            self.stdin
+                .read_line(&mut novo_todo)
+                .map_err(TerminalError::Stdin)?;
 
-            Ok(Todo { message: novo_todo })
+            Ok(Some(Todo { message: novo_todo }))
         } else {
-            writeln!(self.stdout, "\nAté a próxima 👋 e volte sempre!🫶\n")?;
+            writeln!(self.stdout, "\nAté a próxima 👋 e volte sempre!🫶\n")
+                .map_err(TerminalError::Stdout)?;
 
-            std::process::exit(0);
+            return Ok(None);
         }
     }
 
-    fn show_todo(&mut self, todo: &Todo) {
-        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔷 {}", todo.message);
+    fn show_todo(&mut self, todo: &Todo) -> Result<(), TerminalError> {
+        writeln!(self.stdout, "\nvocê criou o TODO\n\n 🔷 {}", todo.message)
+            .map_err(TerminalError::Stdout)?;
+        Ok(())
     }
 
-    fn erro_todo(&mut self, erro: &Error) {
-        format!("\nDeu Erro!\n\n ");
+    fn erro_todo(erro: TerminalError) {
+        eprintln!(" Deu Erro! {:?}", erro);
     }
+}
+
+#[derive(Debug)]
+enum TerminalError {
+    Stdout(Error),
+    Stdin(Error),
 }
